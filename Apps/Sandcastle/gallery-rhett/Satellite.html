@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="satellite.min.js"></script>
+  <style>
+    html, body{ margin:0; height:100%; }
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<script type="module">
+  // Your access token can be found at: https://ion.cesium.com/tokens.
+  // This is the default access token from your ion account
+  window.CESIUM_BASE_URL = "../../../Build/CesiumUnminified/";
+  import * as Cesium from "../../../Build/CesiumUnminified/index.js";
+  window.Cesium = Cesium;
+
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTFhN2Y1OS1lYjUxLTRjZmYtODQxZi1mZTM4MDU4NWYwMWUiLCJpZCI6MTI5NDE3LCJpYXQiOjE2NzkyODg1ODJ9.XnmmLyiHnjdFa9BJZzCnz7f8zGZXh5RP_quL6nHd9Ts';
+  // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+  const viewer = new Cesium.Viewer('cesiumContainer');
+
+
+
+  /**
+   * 计算 startTime && endTime
+   * minsPerInterval: 一圈分钟数
+   */
+  function getStratEndTime(minsPerInterval) {
+    const startTimeStamp = Date.now()
+    // 结束时间为一圈后的时间
+    const endTimeStamp = startTimeStamp + minsPerInterval * 60 * 1000
+    let startTime = new Cesium.JulianDate.fromDate(new Date(startTimeStamp))
+    startTime = Cesium.JulianDate.addHours(startTime, 8, new Cesium.JulianDate())
+    let endTime = new Cesium.JulianDate.fromDate(new Date(endTimeStamp))
+    endTime = Cesium.JulianDate.addHours(endTime, 8, new Cesium.JulianDate())
+    return {
+      startTime,
+      endTime
+    }}
+
+  /**
+   * 计算SampledPositionProperty
+   * satrec: satellite.twoline2satrec返回值
+   * minsPerInterval：一圈分钟数
+   */
+  function getPositionSample(satrec, minsPerInterval) {
+    const positionProperty = new Cesium.SampledPositionProperty()
+    const now = Date.now()
+    for (let i = 0; i <= minsPerInterval; i++) {
+      // 从现在起，获取一圈内每分钟的位置;生成一个数组，用作插值
+      const curTimeDate = new Date(now + i * 60 * 1000)
+      var positionAndVelocity = satellite.propagate(satrec, curTimeDate) // 此方法拿到的是惯性系坐标
+      var gmst = satellite.gstime(new Date(curTimeDate))
+      // 惯性
+      const positionEci = positionAndVelocity.position
+      // 惯性转成地固
+      const positionEcf = satellite.eciToEcf(positionEci, gmst)
+      // julian日期
+      const curJulianDate = new Cesium.JulianDate.fromDate(curTimeDate)
+      // 北京时
+      const d = new Cesium.JulianDate.addHours(curJulianDate, 8, new Cesium.JulianDate())
+      positionProperty.addSample(
+        d,
+        // 这里使用惯性或者地固都行，但是地固系在端点处偏差较大，因此使用惯性系
+        new Cesium.Cartesian3(positionEci.x * 1000, positionEci.y * 1000, positionEci.z * 1000)
+      )
+    }
+    return positionProperty
+  }
+
+  function satlliteTest() {
+
+    const tleLine1 = '1 43259U 18031A   23317.93447398  .00001431  00000+0  21197-3 0  9990';
+    const tleLine2 = '2 43259  97.8488  26.8480 0004654 129.3605 230.8018 14.76617257303062';
+
+    var satrec = satellite.twoline2satrec(tleLine1, tleLine2)
+    console.log(satrec, 'satrec')
+    let totalIntervalsInDay = satrec.no * 1440 * 0.159155 //1440 = min && 0.159155 = 1turn
+    // 获得运行一圈的分钟数
+    let minsPerInterval = 1440 / totalIntervalsInDay // mins for 1 revolution around earth
+    console.log(minsPerInterval, 'minsPer')
+    // 获取startTime && endTime
+    const { startTime, endTime } = getStratEndTime(minsPerInterval)
+    viewer.clock.startTime = startTime.clone()
+    viewer.clock.endTime = endTime.clone()
+    viewer.clock.currentTime = startTime.clone()
+    // 获取positionProperty
+    const positionProperty = getPositionSample(satrec, minsPerInterval)
+    const entity = viewer.entities.add({
+      name: '卫星',
+      availability: new Cesium.TimeIntervalCollection([
+        new Cesium.TimeInterval({
+          start: startTime,
+          stop: endTime
+        })
+      ]),
+      position: positionProperty,
+      orientation: new Cesium.VelocityOrientationProperty(positionProperty),
+      // 卫星模型
+      billboard:
+        {
+          "show": true,
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=",
+          "scale": 1.5
+        },
+      path: {
+        resolution: 1,
+        material: new Cesium.PolylineGlowMaterialProperty({
+          glowPower: 0.5,
+          color: Cesium.Color.RED
+        }),
+        width: 5
+        // leadTime: 720,
+        // trailTime: 720
+      }
+    })
+    // 插值
+    entity.position.setInterpolationOptions({
+      interpolationDegree: 5,
+      interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
+    })
+  }
+
+  satlliteTest();
+
+</script>
+</div>
+</body>
+</html>
