@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body{ margin:0; height:100%; }
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<script type="module">
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTFhN2Y1OS1lYjUxLTRjZmYtODQxZi1mZTM4MDU4NWYwMWUiLCJpZCI6MTI5NDE3LCJpYXQiOjE2NzkyODg1ODJ9.XnmmLyiHnjdFa9BJZzCnz7f8zGZXh5RP_quL6nHd9Ts';
+
+  // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+  const viewer = new Cesium.Viewer('cesiumContainer');
+</script>
+</div>
+</body>
+</html>
