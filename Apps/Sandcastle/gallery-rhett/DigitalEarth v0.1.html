@@ -20,6 +20,20 @@
 
   // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
   const viewer = new Cesium.Viewer('cesiumContainer');
+
+  // 设置相机位置
+  viewer.camera.setView({
+    // 设置相机位置
+    destination : Cesium.Cartesian3.fromDegrees(115.914598,39.061307, 15000.0),
+
+  });
+
+  const XAProvider = new Cesium.UrlTemplateImageryProvider({
+    url : 'https://minio-api.csnd.com/rs-image/{z}_{x}_{y}.png',
+  });
+
+  viewer.imageryLayers.addImageryProvider(XAProvider)
+
 </script>
 </div>
 </body>
