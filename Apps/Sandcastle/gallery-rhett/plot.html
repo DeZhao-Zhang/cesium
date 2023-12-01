@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js">
+  </script>
+  <script src="./drawArrow/lib/plotUtil.js"></script>
+  <script src="./drawArrow/lib/algorithm.js"></script>
+  <script src="./drawArrow/lib/arrowClass.js"></script>
+  <script src="./drawArrow/lib/drawPlot.js"></script>
+  <style>
+    @import url(../templates/bucket.css);
+  </style>
+</head>
+<body>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar" style="position: absolute">
+  <button id="straightArrow">直线箭头</button>
+  <button id="attackArrow">攻击箭头</button>
+  <button id="pincerArrow">钳击箭头</button>
+  <button id="clear">删除</button>
+  <button id="save">保存</button>
+  <button id="show">展示</button>
+</div>
+<script type="module">
+
+  window.CESIUM_BASE_URL = "../../../Build/CesiumUnminified/";
+  import * as Cesium from "../../../Build/CesiumUnminified/index.js";
+  window.Cesium = Cesium;
+
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTFhN2Y1OS1lYjUxLTRjZmYtODQxZi1mZTM4MDU4NWYwMWUiLCJpZCI6MTI5NDE3LCJpYXQiOjE2NzkyODg1ODJ9.XnmmLyiHnjdFa9BJZzCnz7f8zGZXh5RP_quL6nHd9Ts';
+
+  // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+  var viewer = new Cesium.Viewer('cesiumContainer',
+    {
+      terrainProvider: await Cesium.createWorldTerrainAsync(),
+      geocoder: true, //搜索框
+      homeButton: false, //home按钮
+      sceneModePicker: false, //3d/2d 模式切换按钮
+      baseLayerPicker: true, //图层选择按钮
+      navigationHelpButton: false, //右上角的帮助按钮
+      animation: false, //左下角的动画控件的显示
+      shouldAnimate: false, //控制模型动画
+      timeline: false, //底部的时间轴
+      fullscreenButton: false, //右下角的全屏按钮
+      selectionIndicator: true, //选择指示器
+      infoBox: true, //信息面板
+    });
+
+  viewer._cesiumWidget._creditContainer.style.display = "none"; //隐藏logo版权
+
+  // 设置相机位置
+  viewer.camera.setView({
+    // 设置相机位置
+    destination : Cesium.Cartesian3.fromDegrees(115.914598,39.061307, 1500000.0),
+
+  });
+
+  arrow.disable();
+  arrow.init(viewer);
+  $("#straightArrow").click(function () {
+    arrow.draw("straightArrow");
+  });
+  $("#attackArrow").click(function () {
+    arrow.draw("attackArrow");
+  });
+  $("#pincerArrow").click(function () {
+    arrow.draw("pincerArrow");
+  });
+  $("#clear").click(function () {
+    arrow.clearOne();
+  });
+  $("#save").click(function () {
+    arrow.saveData();
+  });
+  $("#show").click(function () {
+    $.getJSON("data/arrow.json", function (jsonData) {
+      arrow.showData(jsonData);
+    });
+  });
+
+</script>
+</div>
+</body>
+</html>

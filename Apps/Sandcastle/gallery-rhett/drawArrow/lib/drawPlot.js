@@ -25,8 +25,13 @@ var arrow = {
 		}
 	},
 	draw: function(type) {
-		for (var i = 0; i < this.drawArr.length; i++) {
-			this.drawArr[i].disableHandler();
+		for (let i = 0; i < this.drawArr.length; i++) {
+      try {
+        this.drawArr[i].disableHandler();
+      }catch (e){
+        console.log(e)
+      }
+
 		}
 		switch (type) {
 			case "straightArrow":
@@ -35,12 +40,12 @@ var arrow = {
 				this.drawArr.push(straightArrow);
 				break;
 			case "attackArrow":
-				var attackArrow = new AttackArrow(viewer);
+				var attackArrow = new AttackArrow(this.viewer);
 				attackArrow.startDraw();
 				this.drawArr.push(attackArrow);
 				break;
 			case "pincerArrow":
-				var pincerArrow = new PincerArrow(viewer);
+				var pincerArrow = new PincerArrow(this.viewer);
 				pincerArrow.startDraw();
 				this.drawArr.push(pincerArrow);
 			default:

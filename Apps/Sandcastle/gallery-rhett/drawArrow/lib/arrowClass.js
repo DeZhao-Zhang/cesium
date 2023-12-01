@@ -4,7 +4,7 @@ var StraightArrow = function(viewer) {
 	this.objId = Number((new Date()).getTime() + "" + Number(Math.random() * 1000).toFixed(0)); //用于区分多个相同箭头时
 	this.viewer = viewer;
 	this.handler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas);
-	this.pointImageUrl = "img/point.png";
+	this.pointImageUrl = "drawArrow/img/point.png";
 	this.fillMaterial = Cesium.Color.fromCssColorString('#0000FF').withAlpha(0.8);
 	this.outlineMaterial = new Cesium.PolylineDashMaterialProperty({
 		dashLength: 16,
@@ -14,7 +14,7 @@ var StraightArrow = function(viewer) {
 	this.firstPoint = null;
 	this.floatPoint = null;
 	this.arrowEntity = null;
-	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑 
+	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑
 	this.selectPoint = null;
 	this.clickStep = 0;
 	this.modifyHandler = null;
@@ -238,7 +238,7 @@ StraightArrow.prototype = {
 
 ///====================================================================================================
 //攻击箭头
-var AttackArrow = function() {
+var AttackArrow = function(viewer) {
 	this.type = "AttackArrow";
 	this.objId = Number((new Date()).getTime() + "" + Number(Math.random() * 1000).toFixed(0))
 	this.viewer = viewer;
@@ -250,7 +250,7 @@ var AttackArrow = function() {
 		color: Cesium.Color.fromCssColorString('#f00').withAlpha(0.7)
 	});
 	this.positions = []; //控制点
-	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑 
+	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑
 	this.floatPoint = null;
 	this.arrowEntity = null;
 	this.pointArr = []; //中间各点
@@ -317,7 +317,7 @@ AttackArrow.prototype = {
 			if ($this.positions.length > 2) {
 				point.wz = $this.positions.length - 1; //点对应的在positions中的位置  屏蔽mouseMove里往postions添加时 未创建点
 			} else {
-				point.wz = $this.positions.length; //点对应的在positions中的位置 
+				point.wz = $this.positions.length; //点对应的在positions中的位置
 			}
 			$this.pointArr.push(point);
 		}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -363,7 +363,7 @@ AttackArrow.prototype = {
 	},
 	createByData: function(data) { //根据传入的数据构建箭头
 		this.positions = []; //控制点
-		this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑 
+		this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑
 		this.floatPoint = null;
 		this.pointArr = []; //中间各点
 		this.selectPoint = null;
@@ -518,7 +518,7 @@ var PincerArrow = function() {
 		color: Cesium.Color.fromCssColorString('#f00').withAlpha(0.7)
 	});
 	this.positions = [];
-	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑 
+	this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑
 	this.floatPoint = null;
 	this.pointArr = [];
 	this.selectPoint = null;
@@ -599,7 +599,7 @@ PincerArrow.prototype = {
 				if ($this.positions.length > 2) {
 					point.wz = $this.positions.length - 1; //点对应的在positions中的位置  屏蔽mouseMove里往postions添加时 未创建点
 				} else {
-					point.wz = $this.positions.length; //点对应的在positions中的位置 
+					point.wz = $this.positions.length; //点对应的在positions中的位置
 				}
 				$this.pointArr.push(point);
 			}
@@ -630,7 +630,7 @@ PincerArrow.prototype = {
 	},
 	createByData: function(data) { //根据传入的数据构建箭头
 		this.positions = []; //控制点
-		this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑 
+		this.state = -1; //state用于区分当前的状态 0 为删除 1为添加 2为编辑
 		this.floatPoint = null;
 		this.pointArr = []; //中间各点
 		this.selectPoint = null;
