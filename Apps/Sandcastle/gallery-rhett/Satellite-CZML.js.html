@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body{ margin:0; height:100%; }
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<script type="module">
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTFhN2Y1OS1lYjUxLTRjZmYtODQxZi1mZTM4MDU4NWYwMWUiLCJpZCI6MTI5NDE3LCJpYXQiOjE2NzkyODg1ODJ9.XnmmLyiHnjdFa9BJZzCnz7f8zGZXh5RP_quL6nHd9Ts';
+
+  // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    geocoder: true, //搜索框
+    homeButton: false, //home按钮
+    sceneModePicker: false, //3/2.5d/2d 模式切换按钮
+    baseLayerPicker: false, //图层选择按钮
+    baseLayer: false,
+    navigationHelpButton: false, //右上角的帮助按钮
+    animation: true, //左下角的动画控件的显示
+    shouldAnimate: true, //控制模型动画
+    timeline: true, //底部的时间轴
+    fullscreenButton: false, //右下角的全屏按钮
+    selectionIndicator: false, //选择指示器
+    infoBox: false, //信息面板;
+  })
+
+  viewer._cesiumWidget._creditContainer.style.display = "none"; //隐藏logo版权
+
+  // 创建数据（使用上节中生成的数据即可）
+  const czml = [
+    {
+      "id": "document",
+      "version": "1.0",
+      "clock": {"currentTime": "2023-09-01T00:00:00", "multiplier": 60, "interval": "2023-09-01T00:00:00/2023-09-01T00:30:00", "range": "LOOP_STOP", "step": "SYSTEM_CLOCK_MULTIPLIER"}
+    },
+    {
+      "id": "Satellite/GAOFEN-1 02",
+      "description": "Orbit of Satellite:  GAOFEN-1 02",
+      "availability": "2023-09-01T00:00:00/2023-09-01T00:30:00",
+      "billboard": {"show": true, "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=", "scale": 1.5},
+      "position": {
+        "epoch": "2023-09-01T00:00:00",
+        "cartesian": [0.0, 4873266.688596662, -5005404.158810836, 669163.3407255975, 300.0, 4255562.736113206, -4807854.18625023, 2826313.5151843294, 600.0, 3199398.355903954, -4114943.532796643, 4691506.169255713, 900.0, 1813843.9358723462, -2998396.253156822, 6072469.714909458, 1200.0, 241761.78504668982, -1573530.8817108097, 6827429.126581191, 1500.0, -1355172.6460036335, 12970.454424282894, 6879289.804912083, 1800.0, -2812990.3179998635, 1598144.8326222308, 6223046.821993095, 2100.0, -3981968.890422932, 3019215.8803016357, 4926144.424769181, 2400.0, -4741858.211186466, 4130101.4388093534, 3121831.6935629207, 2700.0, -5014402.948530478, 4816514.089030706, 995826.552080883, 3000.0, -4771711.861050273, 5008028.597124771, -1232797.4314256276],
+        "interpolationAlgorithm": "LAGRANGE",
+        "interpolationDegree": 5,
+        "referenceFrame": "INERTIAL"
+      },
+      "label":
+        {
+          "show": true,
+          "text": "GAOFEN-1 02",
+          "horizontalOrigin": "LEFT",
+          "pixelOffset": {"cartesian2": [12, 0]},
+          "fillColor": {"rgba": ["213", "255", "0", 255]},
+          "font": "11pt Lucida Console",
+          "outlineColor": {"rgba": [0, 0, 0, 255]}, "outlineWidth": 2},
+      "path": {"show": [{"interval": "2023-09-01T00:00:00/2023-09-01T00:30:00", "boolean": true}],
+        "width": 1,
+        "leadTime": [{"interval": "2023-09-01T00:00:00/2023-09-01T00:30:00", "epoch": "2023-09-01T00:00:00", "number": [0, 5851.211584478996, 5851.211584478996, 0]}],
+        "trailTime": [{"interval": "2023-09-01T00:00:00/2023-09-01T00:30:00", "epoch": "2023-09-01T00:00:00", "number": [0, 0, 5851.211584478996, 5851.211584478996]}], "resolution": 120,
+        "material": {"solidColor": {"color": {"rgba": ["213", "255", "0", 255]}}}}}];
+
+  // 创建czml data source
+  const dataSource = Cesium.CzmlDataSource.load(czml);
+  // 添加data source
+  viewer.dataSources.add(dataSource);
+  // 将相机飞向该date source
+  viewer.zoomTo(dataSource);
+</script>
+</div>
+</body>
+</html>
