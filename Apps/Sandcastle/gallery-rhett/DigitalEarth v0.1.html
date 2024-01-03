@@ -5,7 +5,9 @@
   <!-- Include the CesiumJS JavaScript and CSS files -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <style>
+  <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <style>
     @import url(../templates/bucket.css);
 
     #toolbar {
@@ -40,7 +42,16 @@
 <div id="cesiumContainer" class="fullSize"></div>
 <div id="loadingOverlay"><h1>Loading...</h1></div>
 <div id="toolbar">
-  <table>
+  <div>
+    <input
+      type="checkbox"
+      id="subscribeNews"
+      checked="checked"
+    />
+    <label for="subscribeNews">图层调整</label>
+  </div>
+
+  <table id="layersTable">
     <tbody data-bind="foreach: layers">
     <tr
       data-bind="css: { up: $parent.upLayer === $data, down: $parent.downLayer === $data }"
@@ -93,8 +104,8 @@
     {
       geocoder: true, //搜索框
       homeButton: false, //home按钮
-      sceneModePicker: false, //3d/2d 模式切换按钮
-      baseLayerPicker: true, //图层选择按钮
+      sceneModePicker: true, //3d/2d 模式切换按钮
+      baseLayerPicker: false, //图层选择按钮
       navigationHelpButton: false, //右上角的帮助按钮
       animation: false, //左下角的动画控件的显示
       shouldAnimate: false, //控制模型动画
@@ -109,15 +120,19 @@
   // 设置相机位置
   viewer.camera.setView({
     // 设置相机位置
-    destination : Cesium.Cartesian3.fromDegrees(115.914598,39.061307, 15000.0),
+    destination : Cesium.Cartesian3.fromDegrees(115.924598,39.045307, 15000.0),
 
   });
 
-  // const XAProvider = new Cesium.UrlTemplateImageryProvider({
-  //   url : 'https://minio-api.csnd.com/rs-image/{z}_{x}_{y}.png',
-  // });
-  //
-  // viewer.imageryLayers.addImageryProvider(XAProvider)
+  $("#subscribeNews").click(function(){
+    if ($('#subscribeNews').is(':checked') == true){
+      $("#layersTable").show()
+    }else {
+      $("#layersTable").hide()
+    }
+  })
+  // 不显示底图
+  viewer.imageryLayers.get(0).show = false;
 
   const imageryLayers = viewer.imageryLayers;
 
@@ -229,7 +244,8 @@
         format: "image/jpeg",
         tileMatrixSetID: "GoogleMapsCompatible",//使用谷歌的瓦片切片方式
         show: true
-      })
+      }),
+      0.8, false
     )
 
     addAdditionalLayerOption(
@@ -240,7 +256,7 @@
         style: "default",
         format: "image/jpeg",
         tileMatrixSetID: "GoogleMapsCompatible",
-      }),
+      }),0.8, false
     )
 
     addAdditionalLayerOption(
@@ -250,7 +266,7 @@
         layer: "tdtCiaLayer",
         style: "default",
         format: "image/jpeg",
-        tileMatrixSetID: "GoogleMapsCompatible", })
+        tileMatrixSetID: "GoogleMapsCompatible", }),0.8, false
     )
 
     // Create the additional layers
@@ -258,7 +274,7 @@
       "长光(Xiong An)",
       new Cesium.UrlTemplateImageryProvider({
         url : 'https://minio-api.csnd.com/rs-image/{z}_{x}_{y}.png',
-      }),
+      }),0.8,true
     );
   }
 
@@ -334,7 +350,7 @@
       const alpha = activeLayer.alpha;
       imageryLayers.remove(activeLayer, false);
       imageryLayers.add(baseLayer, numLayers - activeLayerIndex - 1);
-      baseLayer.show = show;
+      baseLayer.show = true;
       baseLayer.alpha = alpha;
       updateLayerList();
     });
