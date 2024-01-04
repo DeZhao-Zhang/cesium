@@ -8,6 +8,10 @@ import JulianDate from "../Core/JulianDate.js";
 import RuntimeError from "../Core/RuntimeError.js";
 import TimeInterval from "../Core/TimeInterval.js";
 import Entity from "./Entity.js";
+import HeightReference from "../Scene/HeightReference.js";
+import ImageMaterialProperty from "./ImageMaterialProperty.js";
+import CallbackProperty from "./CallbackProperty.js";
+import Rectangle from "../Core/Rectangle.js"
 
 const entityOptionsScratch = {
   id: undefined,
@@ -259,6 +263,51 @@ EntityCollection.prototype.computeAvailability = function () {
     stop: stopTime,
   });
 };
+
+/**
+ * create a gif in given rectangle
+ * @param {string} [url="myGIF.gif"] The url of gif source
+ * @param {number} [west=0.0] The westernmost longitude in degrees in the range [-180.0, 180.0].
+ * @param {number} [south=0.0] The southernmost latitude in degrees in the range [-90.0, 90.0].
+ * @param {number} [east=0.0] The easternmost longitude in degrees in the range [-180.0, 180.0].
+ * @param {number} [north=0.0] The northernmost latitude in degrees in the range [-90.0, 90.0].
+ * @returns
+ *
+ * @example
+ * const myGIF = addGIF("myGIF.gif", 0.0, 20.0, 10.0, 30.0);
+ */
+EntityCollection.prototype.addGIF = function (url, west, south, east, north, callback) {
+  let _entityCollection = this;
+  // 创建image element 并添加资源
+  const image = new Image();
+  image.src = url;
+  // 读取gif数据
+  const superGif = new SuperGif({gif : image});
+  superGif.load(function() {
+    const myGIF = _entityCollection.add({
+      rectangle : {
+        coordinates : Rectangle.fromDegrees(
+            west,
+            south,
+            east,
+            north
+        ),
+        heightReference : HeightReference.RELATIVE_TO_GROUND,
+        material : new ImageMaterialProperty({
+              image : new CallbackProperty(() => {
+                return superGif.get_canvas().toDataURL("image/png");
+              }, false),
+              transparent : true
+            }
+        )
+      },
+    });
+
+    if (defined(callback)) {
+      callback(myGIF);
+    }
+  });
+}
 
 /**
  * Add an entity to the collection.
