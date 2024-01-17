@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+  />
+  <meta
+    name="description"
+    content="Load GeoJSON or TopoJSON data and apply custom styling."
+  />
+  <meta
+    name="cesium-sandcastle-labels"
+    content="Showcases, Tutorials, DataSources"
+  />
+  <title>Cesium Demo</title>
+  <script type="text/javascript" src="../Sandcastle-header.js"></script>
+  <script
+    type="text/javascript"
+    src="../../../Build/CesiumUnminified/Cesium.js"
+    nomodule
+  ></script>
+  <script type="module" src="../load-cesium-es6.js"></script>
+</head>
+<body
+  class="sandcastle-loading"
+  data-sandcastle-bucket="bucket-requirejs.html"
+>
+<style>
+  @import url(../templates/bucket.css);
+</style>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar"></div>
+<script id="cesium_sandcastle_script">
+  window.startup = async function (Cesium) {
+    "use strict";
+    //Sandcastle_Begin
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTFhN2Y1OS1lYjUxLTRjZmYtODQxZi1mZTM4MDU4NWYwMWUiLCJpZCI6MTI5NDE3LCJpYXQiOjE2NzkyODg1ODJ9.XnmmLyiHnjdFa9BJZzCnz7f8zGZXh5RP_quL6nHd9Ts';
+
+
+    const viewer = new Cesium.Viewer('cesiumContainer',
+      {
+        geocoder: true, //搜索框
+        homeButton: false, //home按钮
+        // sceneModePicker: false, //3d/2d 模式切换按钮
+        baseLayerPicker: false, //图层选择按钮
+        // baseLayer: false,
+        navigationHelpButton: false, //右上角的帮助按钮
+        animation: false, //左下角的动画控件的显示
+        shouldAnimate: false, //控制模型动画
+        timeline: false, //底部的时间轴
+        fullscreenButton: false, //右下角的全屏按钮
+        selectionIndicator: false, //选择指示器
+        // infoBox: false, //信息面板
+      });
+
+    viewer._cesiumWidget._creditContainer.style.display = "none"; //隐藏logo版权
+
+
+    function getArea(entity){
+      let polygon = entity.polygon;
+      let hierarchy = polygon.hierarchy._value;
+      let indices = Cesium.PolygonPipeline.triangulate(hierarchy.positions, hierarchy.holes);
+      let area = 0;
+      for (let i = 0; i < indices.length; i += 3) {
+        let vector1 = hierarchy.positions[indices[i]];
+        let vector2 = hierarchy.positions[indices[i+1]];
+        let vector3 = hierarchy.positions[indices[i+2]];
+        let vectorC = Cesium.Cartesian3.subtract(vector2, vector1, new Cesium.Cartesian3());
+        let vectorD = Cesium.Cartesian3.subtract(vector3, vector1, new Cesium.Cartesian3());
+        let areaVector = Cesium.Cartesian3.cross(vectorC, vectorD, new Cesium.Cartesian3());
+        area += Cesium.Cartesian3.magnitude(areaVector)/2.0;
+      }
+
+      return area == 0 ? 0.1 : area
+    }
+
+
+    //Example 1: Load with default styling.
+    Sandcastle.addDefaultToolbarButton("各市行政区划", function () {
+      viewer.dataSources.add(
+        Cesium.GeoJsonDataSource.load(
+          "../../SampleData/seven population.geojson"
+        )
+      );
+    });
+
+    Sandcastle.addToolbarButton("各市人口密度", function () {
+      //Seed the random number generator for repeatable results.
+      Cesium.Math.setRandomNumberSeed(0);
+
+      const promise = Cesium.GeoJsonDataSource.load(
+        "../../SampleData/seven population.geojson"
+      );
+      promise
+        .then(function (dataSource) {
+          viewer.dataSources.add(dataSource);
+
+          //Get the array of entities
+          const entities = dataSource.entities.values;
+
+          const colorHash = {};
+          for (let i = 0; i < entities.length; i++) {
+            //For each entity, create a random color based on the state name.
+            //Some states have multiple entities, so we store the color in a
+            //hash so that we use the same color for the entire state.
+            const entity = entities[i];
+            const name = entity.properties["_市"]._value;
+            let color = colorHash[name];
+            if (!color) {
+              color = Cesium.Color.fromRandom({
+                alpha: 1.0,
+              });
+              colorHash[name] = color;
+            }
+
+            //Set the polygon material to our random color.
+            entity.polygon.material = color;
+            //Remove the outlines.
+            entity.polygon.outline = false;
+
+            //Extrude the polygon based on the state's population.  Each entity
+            //stores the properties for the GeoJSON feature it was created from
+            //Since the population is a huge number, we divide by 50.
+            entity.polygon.extrudedHeight =
+              entity.properties["_七普人口"]._value * 200000000.0 /
+              entity.properties["_area2"]._value
+          }
+        })
+        .catch(function (error) {
+          //Display any errrors encountered while loading.
+          window.alert(error);
+        });
+    });
+
+    //Example 3: Apply custom graphics after load.
+    Sandcastle.addToolbarButton("各市人口数量", function () {
+      //Seed the random number generator for repeatable results.
+      Cesium.Math.setRandomNumberSeed(0);
+
+      const promise = Cesium.GeoJsonDataSource.load(
+        "../../SampleData/seven population.geojson"
+      );
+      promise
+        .then(function (dataSource) {
+          viewer.dataSources.add(dataSource);
+
+          //Get the array of entities
+          const entities = dataSource.entities.values;
+
+          const colorHash = {};
+          for (let i = 0; i < entities.length; i++) {
+            //For each entity, create a random color based on the state name.
+            //Some states have multiple entities, so we store the color in a
+            //hash so that we use the same color for the entire state.
+            const entity = entities[i];
+            const name = entity.properties["_市"]._value;
+            let color = colorHash[name];
+            if (!color) {
+              color = Cesium.Color.fromRandom({
+                alpha: 1.0,
+              });
+              colorHash[name] = color;
+            }
+
+            //Set the polygon material to our random color.
+            entity.polygon.material = color;
+            //Remove the outlines.
+            entity.polygon.outline = false;
+
+            //Extrude the polygon based on the state's population.  Each entity
+            //stores the properties for the GeoJSON feature it was created from
+            //Since the population is a huge number, we divide by 50.
+            entity.polygon.extrudedHeight =
+              entity.properties["_七普人口"]._value / 50.0;
+
+           }
+        })
+        .catch(function (error) {
+          //Display any errrors encountered while loading.
+          window.alert(error);
+        });
+    });
+
+    //Reset the scene when switching demos.
+    Sandcastle.reset = function () {
+      viewer.dataSources.removeAll();
+
+      //Set the camera to a US centered tilted view and switch back to moving in world coordinates.
+      viewer.camera.lookAt(
+        Cesium.Cartesian3.fromDegrees(100, 35.0),
+        new Cesium.Cartesian3(0.0, -4790000.0, 3930000.0)
+      );
+      viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    };
+    //Sandcastle_End
+  };
+  if (typeof Cesium !== "undefined") {
+    window.startupCalled = true;
+    window.startup(Cesium).catch((error) => {
+      "use strict";
+      console.error(error);
+    });
+    Sandcastle.finishedLoading();
+  }
+</script>
+</body>
+</html>
