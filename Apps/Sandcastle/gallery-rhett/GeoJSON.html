@@ -30,6 +30,13 @@
 >
 <style>
   @import url(../templates/bucket.css);
+  .cesium-button {
+    transition: background-color 0.3s; /* 添加过渡效果 */
+  }
+
+  .cesium-button:active {
+    background-color: #c0c0c0; /* 设置鼠标悬停时的背景颜色 */
+  }
 </style>
 <div id="cesiumContainer" class="fullSize"></div>
 <div id="loadingOverlay"><h1>Loading...</h1></div>
@@ -192,8 +199,8 @@
 
       //Set the camera to a US centered tilted view and switch back to moving in world coordinates.
       viewer.camera.lookAt(
-        Cesium.Cartesian3.fromDegrees(100, 35.0),
-        new Cesium.Cartesian3(0.0, -4790000.0, 3930000.0)
+        Cesium.Cartesian3.fromDegrees(110, 35.0),
+        new Cesium.Cartesian3(1000000.0, -4790000.0, 3930000.0)
       );
       viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     };
